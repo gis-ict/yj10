@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYTHON.SYS // Year 6 — Data Containers & Modules</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0a2540;--blue-deep:#061829;--cyan:#22d3ee;--cyan-soft:#7dd3fc;--paper:#0d2a47;
+  --line:rgba(125,211,252,.28);--line-strong:rgba(125,211,252,.6);--ink:#dbeafe;--ink-dim:#7fa8cc;
+  --amber:#fbbf24;--lime:#a3e635;--rose:#fb7185;--white:#eaf4ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;color:var(--ink);background-color:var(--blue);
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px),
+    linear-gradient(rgba(125,211,252,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(125,211,252,.07) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-attachment:fixed;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;height:4px;background:var(--cyan);width:0;z-index:2000;transition:width .4s ease;box-shadow:0 0 12px var(--cyan)}
+header{position:sticky;top:0;z-index:1000;display:flex;align-items:stretch;justify-content:space-between;background:rgba(6,24,41,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-strong)}
+.title-block{display:flex;align-items:center;gap:14px;padding:10px 5%;border-right:1px solid var(--line)}
+.stamp{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:.62rem;letter-spacing:.18em;color:var(--blue);background:var(--cyan);padding:4px 9px;border-radius:2px;transform:rotate(-3deg)}
+.doc-id{font-family:'Archivo',sans-serif;font-weight:900;font-size:1.05rem;letter-spacing:.04em;color:var(--white)}
+.doc-id small{display:block;font-family:'IBM Plex Mono';font-weight:500;font-size:.6rem;letter-spacing:.22em;color:var(--cyan-soft);margin-top:1px}
+.meter{display:flex;align-items:center;gap:18px;padding:10px 5%}
+.spec{font-family:'IBM Plex Mono';font-size:.62rem;letter-spacing:.14em;color:var(--ink-dim);text-align:right;line-height:1.4}
+.spec b{color:var(--cyan-soft)}
+.xp{font-family:'IBM Plex Mono';font-weight:700;font-size:.82rem;letter-spacing:.08em;color:var(--blue);background:var(--cyan);padding:7px 16px;border-radius:2px;white-space:nowrap;box-shadow:0 0 0 1px var(--cyan),0 0 14px rgba(34,211,238,.4)}
+.container{max-width:880px;margin:46px auto 90px;padding:0 22px}
+section{display:none;animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+section.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.sheet-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.sheet-no{font-family:'IBM Plex Mono';font-weight:700;font-size:.7rem;letter-spacing:.2em;color:var(--blue);background:var(--cyan-soft);padding:5px 11px;border-radius:2px}
+.sheet-no.rev{background:var(--amber)}
+.sub{font-family:'IBM Plex Mono';font-size:.66rem;letter-spacing:.18em;color:var(--ink-dim)}
+.tag-rev{font-family:'IBM Plex Mono';font-size:.6rem;letter-spacing:.18em;color:var(--blue);background:var(--amber);padding:3px 8px;border-radius:2px}
+h1{font-family:'Archivo',sans-serif;font-weight:900;font-size:clamp(1.6rem,4.5vw,2.5rem);line-height:1.05;letter-spacing:-.01em;color:var(--white)}
+h1 .accent{color:var(--cyan)}
+.lead{font-size:1.02rem;color:var(--cyan-soft);max-width:60ch;margin:10px 0 26px;border-left:2px solid var(--line-strong);padding-left:16px}
+.lead b{color:var(--white);font-weight:700}
+.module{position:relative;background:var(--paper);border:1px solid var(--line-strong);border-radius:4px;padding:26px 26px 22px;margin:22px 0;box-shadow:0 18px 40px -22px #000}
+.module::before{content:"";position:absolute;inset:6px;border:1px solid var(--line);border-radius:2px;pointer-events:none}
+.module .corner{position:absolute;width:10px;height:10px;border:2px solid var(--cyan);opacity:.55}
+.module .corner.tl{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.module .corner.tr{top:-1px;right:-1px;border-left:0;border-bottom:0}
+.module .corner.bl{bottom:-1px;left:-1px;border-right:0;border-top:0}
+.module .corner.br{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.mod-label{position:relative;z-index:1;font-family:'IBM Plex Mono';font-weight:600;font-size:.66rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.mod-label::after{content:"";flex:1;height:1px;background:var(--line)}
+.code{position:relative;z-index:1;background:var(--blue-deep);border:1px solid var(--line);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:.88rem;color:#cfe3f5;margin:6px 0 4px;line-height:1.65;overflow-x:auto}
+.code-bar{display:flex;align-items:center;gap:7px;padding:9px 14px;border-bottom:1px solid var(--line);background:rgba(34,211,238,.05)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ink-dim);opacity:.5}
+.code-name{font-size:.66rem;letter-spacing:.1em;color:var(--ink-dim);margin-left:6px}
+.copy{margin-left:auto;background:transparent;border:1px solid var(--line-strong);color:var(--cyan-soft);font-family:'IBM Plex Mono';font-size:.62rem;letter-spacing:.12em;padding:4px 11px;border-radius:3px;cursor:pointer;transition:.15s}
+.copy:hover{background:var(--cyan);color:var(--blue);border-color:var(--cyan)}
+.code pre{padding:16px 18px;margin:0;white-space:pre;tab-size:4}
+.comment{color:#5e83a3;font-style:italic}
+.keyword{color:#c792ea;font-weight:600}
+.string{color:#c3e88d}
+.number{color:#f78c6c}
+.function{color:#82aaff}
+.builtin{color:#ffcb6b}
+.note{position:relative;z-index:1;margin:16px 0 2px;padding:14px 16px 14px 42px;background:rgba(34,211,238,.07);border:1px dashed var(--line-strong);border-radius:3px;font-size:.92rem}
+.note::before{content:"⌖";position:absolute;left:14px;top:12px;color:var(--cyan);font-size:1.1rem}
+.note b{color:var(--cyan-soft)}
+.note.warn{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.45)}
+.note.warn::before{content:"⚠";color:var(--amber)}
+.note.warn b{color:var(--amber)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;position:relative;z-index:1}
+.chip{font-family:'IBM Plex Mono';font-size:.68rem;letter-spacing:.08em;color:var(--cyan-soft);border:1px solid var(--line);border-radius:99px;padding:5px 12px;background:rgba(125,211,252,.04)}
+.bench{position:relative;border:1px solid var(--cyan);border-radius:4px;margin:24px 0 8px;background:linear-gradient(180deg,rgba(34,211,238,.08),rgba(34,211,238,.02));overflow:hidden}
+.bench-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);font-family:'IBM Plex Mono';font-weight:600;font-size:.7rem;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}
+.bench-head .led{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.bench-body{padding:18px}
+.bench-body p{margin-bottom:6px}
+.q-code{font-family:'IBM Plex Mono';background:var(--blue-deep);border:1px solid var(--line);padding:2px 7px;border-radius:3px;color:#c3e88d;font-size:.86rem}
+.row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.field{flex:1;min-width:180px;background:var(--blue-deep);border:1px solid var(--line-strong);border-radius:3px;color:var(--white);font-family:'IBM Plex Mono';font-size:.95rem;padding:13px 15px;outline:none;transition:.15s}
+.field:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
+.btn{font-family:'IBM Plex Mono';font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;border:none;border-radius:3px;padding:13px 22px;cursor:pointer;transition:.18s;white-space:nowrap}
+.btn-run{background:var(--cyan);color:var(--blue)}
+.btn-run:hover{transform:translateY(-2px);box-shadow:0 6px 16px -4px var(--cyan)}
+.btn-next{background:transparent;color:var(--cyan);border:1px solid var(--cyan);margin-top:26px}
+.btn-next:hover{background:var(--cyan);color:var(--blue)}
+.btn-next.rev{color:var(--amber);border-color:var(--amber)}
+.btn-next.rev:hover{background:var(--amber);color:var(--blue)}
+.fb{display:none;margin-top:14px;padding:11px 14px;border-radius:3px;font-family:'IBM Plex Mono';font-size:.82rem;letter-spacing:.04em}
+.fb.ok{display:block;background:rgba(163,230,53,.12);border:1px solid var(--lime);color:var(--lime)}
+.fb.no{display:block;background:rgba(251,113,133,.12);border:1px solid var(--rose);color:var(--rose)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.opt{font-family:'IBM Plex Mono';font-size:.86rem;text-align:left;background:var(--blue-deep);border:1px solid var(--line-strong);color:var(--ink);padding:12px 14px;border-radius:3px;cursor:pointer;transition:.15s}
+.opt:hover{border-color:var(--cyan);color:var(--white)}
+.opt.picked-ok{border-color:var(--lime);color:var(--lime);background:rgba(163,230,53,.1)}
+.opt.picked-no{border-color:var(--rose);color:var(--rose);background:rgba(251,113,133,.1)}
+.specsheet{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin:18px 0;position:relative;z-index:1}
+.spec-cell{background:var(--paper);padding:16px 15px}
+.spec-cell .k{font-family:'IBM Plex Mono';font-size:.6rem;letter-spacing:.16em;color:var(--ink-dim);margin-bottom:7px}
+.spec-cell .v{font-family:'IBM Plex Mono';font-weight:600;color:var(--cyan-soft);font-size:.92rem}
+.spec-cell .d{font-size:.8rem;color:var(--ink-dim);margin-top:4px}
+.trace{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.trace-step{display:flex;gap:12px;align-items:center;font-family:'IBM Plex Mono';font-size:.85rem;background:var(--blue-deep);border:1px solid var(--line);border-radius:3px;padding:10px 14px;cursor:pointer;transition:.15s}
+.trace-step:hover{border-color:var(--cyan)}
+.trace-step .n{color:var(--blue);background:var(--cyan-soft);width:22px;height:22px;border-radius:3px;display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.trace-step .res{margin-left:auto;color:var(--ink-dim);font-size:.78rem}
+.trace-step.revealed .res{color:var(--lime)}
+#landing{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background-color:var(--blue-deep);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px}
+#landing .stamp-lg{font-family:'IBM Plex Mono';font-weight:700;font-size:.7rem;letter-spacing:.3em;color:var(--cyan);border:1px solid var(--cyan);padding:8px 18px;border-radius:3px;margin-bottom:26px}
+#landing h1{font-size:clamp(2.2rem,8vw,4rem);margin-bottom:8px}
+#landing p{color:var(--cyan-soft);font-family:'IBM Plex Mono';font-size:.84rem;letter-spacing:.1em;margin-bottom:20px}
+#landing .legend{font-family:'IBM Plex Mono';font-size:.62rem;letter-spacing:.14em;color:var(--ink-dim);margin-bottom:30px}
+#landing .modlist{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:34px;max-width:600px}
+.chip.rev{border-color:rgba(251,191,36,.5);color:var(--amber);background:rgba(251,191,36,.06)}
+.btn-boot{font-family:'IBM Plex Mono';font-weight:700;font-size:1rem;letter-spacing:.18em;background:var(--cyan);color:var(--blue);border:none;padding:18px 40px;border-radius:3px;cursor:pointer;transition:.2s;box-shadow:0 0 0 1px var(--cyan),0 0 30px rgba(34,211,238,.5)}
+.btn-boot:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--cyan),0 0 50px rgba(34,211,238,.8)}
+#done{position:fixed;inset:0;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(6,24,41,.96);backdrop-filter:blur(6px)}
+#done.show{display:flex;animation:rise .5s both}
+.cert{border:2px solid var(--cyan);border-radius:6px;padding:38px 44px;max-width:440px;background:var(--paper);position:relative}
+.cert::before{content:"";position:absolute;inset:7px;border:1px solid var(--line);border-radius:3px}
+.cert .seal{font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.2em;font-size:.66rem;color:var(--blue);background:var(--cyan);display:inline-block;padding:5px 14px;border-radius:2px;margin-bottom:18px}
+.cert h2{font-family:'Archivo';font-weight:900;font-size:1.8rem;color:var(--white);margin-bottom:8px}
+.cert .final-xp{font-family:'IBM Plex Mono';font-size:2.4rem;font-weight:700;color:var(--cyan);margin:14px 0}
+.spark{position:fixed;pointer-events:none;z-index:3000;font-family:'IBM Plex Mono';font-weight:700;color:var(--cyan);font-size:.9rem;animation:floatUp 1.3s ease-out forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(1.3)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:560px){.title-block{border-right:0;padding:10px 5%}.spec{display:none}.opts{grid-template-columns:1fr}header{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <div class="stamp-lg">DIGITAL TECHNOLOGIES · YEAR 6</div>
+  <h1>PYTHON<span style="color:var(--cyan)">.</span>SYS</h1>
+  <p>DATA CONTAINERS &amp; MODULES</p>
+  <div class="legend">▸ AMBER = REVIEW &nbsp;·&nbsp; CYAN = NEW BUILD</div>
+  <div class="modlist">
+    <span class="chip rev">REVIEW: BASICS</span><span class="chip rev">REVIEW: STRINGS</span><span class="chip rev">REVIEW: LOGIC</span>
+    <span class="chip">LIST</span><span class="chip">TUPLE</span><span class="chip">SET</span><span class="chip">DICTIONARY</span><span class="chip">FUNCTION</span>
+  </div>
+  <button class="btn-boot" onclick="boot()">▸ LOAD BLUEPRINT</button>
+</div>
+
+<div id="done">
+  <div class="cert">
+    <span class="seal">CERTIFIED // YEAR 6</span>
+    <h2>Blueprint Approved</h2>
+    <p style="color:var(--cyan-soft);font-family:'IBM Plex Mono';font-size:.8rem;letter-spacing:.1em">All build sheets pass inspection.</p>
+    <div class="final-xp" id="final-xp">0 PTS</div>
+    <p style="color:var(--ink-dim);font-size:.9rem">You can now choose the right container — list, tuple, set, or dictionary — and build reusable functions. You're ready for Year 7.</p>
+    <button class="btn-run" style="margin-top:22px" onclick="document.getElementById('done').classList.remove('show')">CLOSE</button>
+  </div>
+</div>
+
+<div id="progress"></div>
+<audio id="snd-ok" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+
+<header>
+  <div class="title-block">
+    <span class="stamp">REV 1</span>
+    <div class="doc-id">PYTHON.SYS<small id="sheet-tag">SHEET R1 / 08</small></div>
+  </div>
+  <div class="meter">
+    <div class="spec">SCALE <b>1:1</b><br>UNIT <b id="unit-tag">REVIEW</b></div>
+    <div class="xp" id="xp">000 PTS</div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ============ REVIEW 1 — BASICS ============ -->
+<section id="sec-0" class="active">
+  <div class="sheet-head"><span class="sheet-no rev">REVIEW 1</span><span class="tag-rev">RECAP</span><span class="sub">VARIABLES · OPERATORS · TYPES</span></div>
+  <h1>Review — <span class="accent">The Basics</span></h1>
+  <p class="lead">Three quick review sheets warm up what you already know, then we build five new parts. First up: the <b>variables, operators and types</b> from your Masterclass.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">PARTS CATALOGUE · ALREADY IN YOUR TOOLKIT</div>
+    <div class="specsheet">
+      <div class="spec-cell"><div class="k">VARIABLE</div><div class="v">score = 10</div><div class="d">A labelled box that stores a value.</div></div>
+      <div class="spec-cell"><div class="k">MATH OPS</div><div class="v">+ - * /</div><div class="d">Add, subtract, multiply, divide.</div></div>
+      <div class="spec-cell"><div class="k">SPECIAL OPS</div><div class="v">** // %</div><div class="d">Power, floor-divide, remainder.</div></div>
+      <div class="spec-cell"><div class="k">TYPES</div><div class="v">int · float · str</div><div class="d">Whole number, decimal, text.</div></div>
+    </div>
+    <div class="note"><b>Reminders:</b> <code class="q-code">7 // 2</code> → <code class="q-code">3</code>, &nbsp; <code class="q-code">7 % 2</code> → <code class="q-code">1</code>, &nbsp; <code class="q-code">5 ** 2</code> → <code class="q-code">25</code>, &nbsp; <code class="q-code">int("4")+1</code> → <code class="q-code">5</code>.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>REVIEW BENCH 1 · REMEMBER THE OPS</div>
+    <div class="bench-body">
+      <p>What does <span class="q-code">11 % 2</span> give you?</p>
+      <div class="opts" id="opts0">
+        <button class="opt" onclick="pick(this,false)">5</button>
+        <button class="opt" onclick="pick(this,true,'a0',10)">1</button>
+        <button class="opt" onclick="pick(this,false)">5.5</button>
+        <button class="opt" onclick="pick(this,false)">2</button>
+      </div>
+      <div class="fb" id="fb-a0"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next rev" onclick="nav(1)">REVIEW 2 · STRINGS →</button>
+</section>
+
+<!-- ============ REVIEW 2 — STRINGS ============ -->
+<section id="sec-1">
+  <div class="sheet-head"><span class="sheet-no rev">REVIEW 2</span><span class="tag-rev">RECAP</span><span class="sub">TEXT · SLICING · F-STRINGS</span></div>
+  <h1>Review — <span class="accent">Strings</span></h1>
+  <p class="lead">A quick recap of <b>text</b>: counting it, slicing a piece, changing case, and plugging variables in. You'll reuse all of this when storing text inside the new containers.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">RECAP SPEC · str " "</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">strings_review.py</span>
+        <button class="copy" onclick="copyCode('r1')">⧉ COPY</button></div>
+<pre id="r1">word = <span class="string">"Python"</span>
+<span class="builtin">print</span>(<span class="builtin">len</span>(word))      <span class="comment"># 6 → count the characters</span>
+<span class="builtin">print</span>(word[<span class="number">0</span>:<span class="number">2</span>])    <span class="comment"># Py → slice (stops before 2)</span>
+<span class="builtin">print</span>(word.<span class="function">upper</span>())  <span class="comment"># PYTHON</span>
+name = <span class="string">"Alex"</span>
+<span class="builtin">print</span>(<span class="string">f"Hi {name}!"</span>)  <span class="comment"># f-string plugs the variable in</span></pre>
+    </div>
+    <div class="chips"><span class="chip">len()</span><span class="chip">[start:stop]</span><span class="chip">.upper()</span><span class="chip">f"{ }"</span></div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>REVIEW BENCH 2 · SLICE IT</div>
+    <div class="bench-body">
+      <p>What does <span class="q-code">"Slay"[0:2]</span> print?</p>
+      <div class="row">
+        <input class="field" id="a1" placeholder="type the 2 letters" onkeydown="if(event.key==='Enter')check('a1','Sl',10,this)">
+        <button class="btn btn-run" onclick="check('a1','Sl',10)">▸ RUN TEST</button>
+      </div>
+      <div class="fb" id="fb-a1"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next rev" onclick="nav(2)">REVIEW 3 · LOGIC →</button>
+</section>
+
+<!-- ============ REVIEW 3 — LOGIC ============ -->
+<section id="sec-2">
+  <div class="sheet-head"><span class="sheet-no rev">REVIEW 3</span><span class="tag-rev">RECAP</span><span class="sub">COMPARING · IF / ELIF / ELSE</span></div>
+  <h1>Review — <span class="accent">Logic &amp; Decisions</span></h1>
+  <p class="lead">Last recap: asking <b>True/False</b> questions and making decisions with <code class="q-code">if</code>, <code class="q-code">elif</code>, <code class="q-code">else</code>. Then we move on to brand-new parts.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">RECAP SPEC · COMPARE &amp; DECIDE</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">logic_review.py</span>
+        <button class="copy" onclick="copyCode('r2')">⧉ COPY</button></div>
+<pre id="r2"><span class="builtin">print</span>(<span class="number">5</span> == <span class="number">5</span>)   <span class="comment"># True  → "is equal?" (TWO equals)</span>
+<span class="builtin">print</span>(<span class="number">5</span> != <span class="number">3</span>)   <span class="comment"># True  → "not equal?"</span>
+
+score = <span class="number">75</span>
+<span class="keyword">if</span> score >= <span class="number">90</span>:
+    <span class="builtin">print</span>(<span class="string">"Gold"</span>)
+<span class="keyword">elif</span> score >= <span class="number">50</span>:
+    <span class="builtin">print</span>(<span class="string">"Pass"</span>)    <span class="comment"># 75>=50 True → runs here ✓</span>
+<span class="keyword">else</span>:
+    <span class="builtin">print</span>(<span class="string">"Try again"</span>)</pre>
+    </div>
+    <div class="note warn"><b>Don't forget:</b> compare with <code class="q-code">==</code> (two equals), end the line with a colon <code class="q-code">:</code>, and indent the line underneath.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>REVIEW BENCH 3 · WHICH OPERATOR</div>
+    <div class="bench-body">
+      <p>Which operator asks "is exactly equal to?"</p>
+      <div class="opts" id="opts2">
+        <button class="opt" onclick="pick(this,false)">=</button>
+        <button class="opt" onclick="pick(this,true,'a2',10)">==</button>
+        <button class="opt" onclick="pick(this,false)">!=</button>
+        <button class="opt" onclick="pick(this,false)">&gt;=</button>
+      </div>
+      <div class="fb" id="fb-a2"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next" onclick="nav(3)">SHEET 01 · LISTS (NEW) →</button>
+</section>
+
+<!-- ============ LESSON 1 — LIST ============ -->
+<section id="sec-3">
+  <div class="sheet-head"><span class="sheet-no">SHEET 01</span><span class="sub">NEW BUILD · STORAGE RACK</span></div>
+  <h1>The <span class="accent">List</span> — Storage Rack</h1>
+  <p class="lead">A <b>list</b> holds many items in order, inside square brackets <code class="q-code">[ ]</code>. It can <b>change</b> any time — add, read a slot, or count what's inside. This is your everyday container.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">COMPONENT SPEC · list [ ]</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">lists.py</span>
+        <button class="copy" onclick="copyCode('c1')">⧉ COPY</button></div>
+<pre id="c1">team = [<span class="string">"Mia"</span>, <span class="string">"Sam"</span>, <span class="string">"Lee"</span>]
+
+<span class="builtin">print</span>(team[<span class="number">0</span>])       <span class="comment"># Mia → slots start at 0</span>
+<span class="builtin">print</span>(<span class="builtin">len</span>(team))     <span class="comment"># 3 → how many items</span>
+
+team.<span class="function">append</span>(<span class="string">"Zoe"</span>)  <span class="comment"># add to the END</span>
+team[<span class="number">1</span>] = <span class="string">"Max"</span>     <span class="comment"># change a slot (lists can change!)</span>
+<span class="builtin">print</span>(team)          <span class="comment"># ['Mia','Max','Lee','Zoe']</span></pre>
+    </div>
+    <div class="chips"><span class="chip">[ ] = list</span><span class="chip">slot 0 = first</span><span class="chip">.append() = add</span><span class="chip">can change</span></div>
+    <div class="note"><b>Real build:</b> a list of players, a shopping cart, scores in order — anywhere the order matters and the contents change.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>TEST BENCH 01 · GROW THE LIST</div>
+    <div class="bench-body">
+      <p>Which method adds a new item to the <b>end</b> of a list?</p>
+      <div class="row">
+        <input class="field" id="a3" placeholder="method name (no brackets)" onkeydown="if(event.key==='Enter')check('a3','append',20,this)">
+        <button class="btn btn-run" onclick="check('a3','append',20)">▸ RUN TEST</button>
+      </div>
+      <div class="fb" id="fb-a3"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next" onclick="nav(4)">SHEET 02 · TUPLES →</button>
+</section>
+
+<!-- ============ LESSON 2 — TUPLE ============ -->
+<section id="sec-4">
+  <div class="sheet-head"><span class="sheet-no">SHEET 02</span><span class="sub">NEW BUILD · LOCKED PART</span></div>
+  <h1>The <span class="accent">Tuple</span> — Locked Part</h1>
+  <p class="lead">A <b>tuple</b> looks like a list but uses round brackets <code class="q-code">( )</code> and is <b>locked</b>. Once built, it cannot change. Use it for data that should never be edited by accident.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">COMPONENT SPEC · tuple ( )</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">tuples.py</span>
+        <button class="copy" onclick="copyCode('c2')">⧉ COPY</button></div>
+<pre id="c2">point = (<span class="number">10</span>, <span class="number">20</span>)     <span class="comment"># round brackets = tuple</span>
+
+<span class="builtin">print</span>(point[<span class="number">0</span>])     <span class="comment"># 10 → you can still READ slots</span>
+<span class="builtin">print</span>(<span class="builtin">len</span>(point))   <span class="comment"># 2</span>
+
+point[<span class="number">0</span>] = <span class="number">5</span>      <span class="comment"># ❌ ERROR! tuples are LOCKED</span></pre>
+    </div>
+    <div class="chips"><span class="chip">( ) = tuple</span><span class="chip">read OK</span><span class="chip">change = error</span><span class="chip">stays safe</span></div>
+    <div class="note warn"><b>List vs Tuple:</b> same idea, different bracket. <code class="q-code">[ ]</code> can change, <code class="q-code">( )</code> is frozen. Pick a tuple when the values must stay fixed — like map coordinates or days of the week.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>TEST BENCH 02 · SPOT THE LOCK</div>
+    <div class="bench-body">
+      <p>Which brackets build a <b>tuple</b> — the container that cannot be changed?</p>
+      <div class="opts" id="opts4">
+        <button class="opt" onclick="pick(this,false)">[ ] square</button>
+        <button class="opt" onclick="pick(this,true,'a4',20)">( ) round</button>
+        <button class="opt" onclick="pick(this,false)">{ } curly</button>
+        <button class="opt" onclick="pick(this,false)">&lt; &gt; angle</button>
+      </div>
+      <div class="fb" id="fb-a4"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next" onclick="nav(5)">SHEET 03 · SETS →</button>
+</section>
+
+<!-- ============ LESSON 3 — SET ============ -->
+<section id="sec-5">
+  <div class="sheet-head"><span class="sheet-no">SHEET 03</span><span class="sub">NEW BUILD · UNIQUE BIN</span></div>
+  <h1>The <span class="accent">Set</span> — Unique Bin</h1>
+  <p class="lead">A <b>set</b> uses curly brackets <code class="q-code">{ }</code> and keeps only <b>unique</b> items — no duplicates allowed. Add the same thing twice and the second one just disappears.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">COMPONENT SPEC · set { }</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">sets.py</span>
+        <button class="copy" onclick="copyCode('c3')">⧉ COPY</button></div>
+<pre id="c3">fruits = {<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"apple"</span>}
+<span class="builtin">print</span>(fruits)        <span class="comment"># {'apple','banana'} → duplicate gone!</span>
+<span class="builtin">print</span>(<span class="builtin">len</span>(fruits))   <span class="comment"># 2 → only unique items counted</span>
+
+fruits.<span class="function">add</span>(<span class="string">"orange"</span>) <span class="comment"># add a new unique item</span>
+fruits.<span class="function">add</span>(<span class="string">"apple"</span>)  <span class="comment"># ignored — already there</span></pre>
+    </div>
+    <div class="chips"><span class="chip">{ } = set</span><span class="chip">no duplicates</span><span class="chip">.add()</span><span class="chip">unordered</span></div>
+    <div class="note"><b>Real build:</b> a list of <b>unique</b> usernames, or every different country a class has visited — anywhere a thing should appear once only.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>TEST BENCH 03 · COUNT THE UNIQUE</div>
+    <div class="bench-body">
+      <p>A set is <span class="q-code">s = {1, 1, 2, 2, 3}</span>. After duplicates are removed, what is <span class="q-code">len(s)</span>?</p>
+      <div class="opts" id="opts5">
+        <button class="opt" onclick="pick(this,false)">5</button>
+        <button class="opt" onclick="pick(this,true,'a5',20)">3</button>
+        <button class="opt" onclick="pick(this,false)">2</button>
+        <button class="opt" onclick="pick(this,false)">6</button>
+      </div>
+      <div class="fb" id="fb-a5"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next" onclick="nav(6)">SHEET 04 · DICTIONARIES →</button>
+</section>
+
+<!-- ============ LESSON 4 — DICTIONARY ============ -->
+<section id="sec-6">
+  <div class="sheet-head"><span class="sheet-no">SHEET 04</span><span class="sub">NEW BUILD · LABELLED DRAWERS</span></div>
+  <h1>The <span class="accent">Dictionary</span> — Labelled Drawers</h1>
+  <p class="lead">A <b>dictionary</b> stores <b>key : value</b> pairs in curly brackets <code class="q-code">{ }</code> — like labelled drawers. You don't count to a slot; you open the drawer by its <b>label</b>.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">COMPONENT SPEC · dict { key : value }</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">dictionaries.py</span>
+        <button class="copy" onclick="copyCode('c4')">⧉ COPY</button></div>
+<pre id="c4">player = {
+    <span class="string">"name"</span>: <span class="string">"Ninja"</span>,    <span class="comment"># label : value</span>
+    <span class="string">"level"</span>: <span class="number">12</span>
+}
+
+<span class="builtin">print</span>(player[<span class="string">"name"</span>])   <span class="comment"># Ninja → open by label</span>
+player[<span class="string">"level"</span>] = <span class="number">13</span>     <span class="comment"># change a drawer</span>
+player[<span class="string">"clan"</span>] = <span class="string">"Shadow"</span> <span class="comment"># add a new drawer</span></pre>
+    </div>
+    <div class="chips"><span class="chip">key : value</span><span class="chip">open by label</span><span class="chip">can change</span><span class="chip">models one object</span></div>
+    <div class="note"><b>Set vs Dict:</b> both use <code class="q-code">{ }</code>. A set holds single items <code class="q-code">{"a","b"}</code>; a dict holds <i>pairs</i> <code class="q-code">{"a":1}</code>. The <b>colon</b> is the giveaway.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>TEST BENCH 04 · READ THE LABEL</div>
+    <div class="bench-body">
+      <p>In <span class="q-code">player = {"name": "Ninja"}</span>, which single character separates the <b>key</b> from its <b>value</b>?</p>
+      <div class="row">
+        <input class="field" id="a6" placeholder="type one symbol" onkeydown="if(event.key==='Enter')check('a6',':',20,this)">
+        <button class="btn btn-run" onclick="check('a6',':',20)">▸ RUN TEST</button>
+      </div>
+      <div class="fb" id="fb-a6"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-next" onclick="nav(7)">SHEET 05 · FUNCTIONS →</button>
+</section>
+
+<!-- ============ LESSON 5 — FUNCTION ============ -->
+<section id="sec-7">
+  <div class="sheet-head"><span class="sheet-no">SHEET 05</span><span class="sub">NEW BUILD · REUSABLE MODULE</span></div>
+  <h1>The <span class="accent">Function</span> — Reusable Module</h1>
+  <p class="lead">A <b>function</b> is a part you design <b>once and reuse forever</b>. Build it with <code class="q-code">def</code>, give it inputs, and call it whenever you need it. This is the heart of building bigger programs.</p>
+
+  <div class="module">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="mod-label">COMPONENT SPEC · def name(input)</div>
+    <div class="code">
+      <div class="code-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-name">functions.py</span>
+        <button class="copy" onclick="copyCode('c5')">⧉ COPY</button></div>
+<pre id="c5"><span class="comment"># DEFINE the module once</span>
+<span class="keyword">def</span> <span class="function">greet</span>(name):
+    <span class="builtin">print</span>(<span class="string">f"Hello, {name}!"</span>)
+
+<span class="comment"># CALL it as many times as you like</span>
+<span class="function">greet</span>(<span class="string">"Alex"</span>)
+<span class="function">greet</span>(<span class="string">"Mia"</span>)
+
+<span class="comment"># RETURN sends an answer back out</span>
+<span class="keyword">def</span> <span class="function">add</span>(a, b):
+    <span class="keyword">return</span> a + b
+
+total = <span class="function">add</span>(<span class="number">4</span>, <span class="number">3</span>)    <span class="comment"># total = 7</span></pre>
+    </div>
+    <div class="chips"><span class="chip">def = define</span><span class="chip">( ) = inputs</span><span class="chip">return = answer</span><span class="chip">build once, reuse</span></div>
+    <div class="note"><b>Mental model:</b> a function is a microwave button. Wire up the logic once, then just press it. The inputs are the food; <code class="q-code">return</code> is the meal you get back.</div>
+  </div>
+
+  <div class="bench">
+    <div class="bench-head"><span class="led"></span>FINAL BENCH · STAMP THE MODULE</div>
+    <div class="bench-body">
+      <p>Which 3-letter keyword <b>defines</b> a new function?</p>
+      <div class="row">
+        <input class="field" id="a7" placeholder="3 letters" onkeydown="if(event.key==='Enter')check('a7','def',30,this)">
+        <button class="btn btn-run" onclick="check('a7','def',30)">▸ FINAL TEST</button>
+      </div>
+      <div class="fb" id="fb-a7"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:46px">
+    <button class="btn-boot" onclick="finish()">▸ SUBMIT FOR APPROVAL</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+let score=0;
+const done=new Set();
+const TOTAL=7;
+const units=['REVIEW 1','REVIEW 2','REVIEW 3','LIST','TUPLE','SET','DICTIONARY','FUNCTION'];
+const tags=['R1','R2','R3','01','02','03','04','05'];
+
+function boot(){
+  const l=document.getElementById('landing');
+  l.style.transition='opacity .4s';l.style.opacity='0';
+  setTimeout(()=>l.style.display='none',400);
+  const s=document.getElementById('snd-ok');s.play().then(()=>s.pause()).catch(()=>{});
+}
+function nav(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('progress').style.width=(id/TOTAL*100)+'%';
+  document.getElementById('sheet-tag').textContent='SHEET '+tags[id]+' / 08';
+  document.getElementById('unit-tag').textContent=units[id];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function award(xp,key){
+  if(done.has(key))return;
+  done.add(key);score+=xp;
+  document.getElementById('xp').textContent=String(score).padStart(3,'0')+' PTS';
+  const x=document.getElementById('snd-ok');x.currentTime=0;x.play().catch(()=>{});
+  spark('+'+xp);
+}
+function spark(txt){
+  const s=document.createElement('div');
+  s.className='spark';s.textContent=txt;
+  s.style.left=(window.innerWidth*0.5 + (Math.random()*120-60))+'px';
+  s.style.top=(window.scrollY+160)+'px';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),1300);
+}
+function check(id,correct,xp,el){
+  const input=el||document.getElementById(id);
+  const fb=document.getElementById('fb-'+id);
+  const val=input.value.trim().toLowerCase();
+  if(val===correct.toLowerCase()){
+    fb.className='fb ok';fb.textContent='✓ PASS · nice work. +'+xp+' pts';
+    award(xp,id);
+  }else{
+    fb.className='fb no';fb.textContent='✗ NOT YET · re-read the spec above and try again.';
+  }
+}
+function pick(btn,ok,id,xp){
+  const parent=btn.parentElement;
+  if(parent.dataset.locked)return;
+  if(ok){
+    btn.classList.add('picked-ok');parent.dataset.locked='1';
+    const fb=document.getElementById('fb-'+id);
+    fb.className='fb ok';fb.textContent='✓ PASS · correct. +'+xp+' pts';
+    award(xp,id);
+  }else{
+    btn.classList.add('picked-no');
+    setTimeout(()=>btn.classList.remove('picked-no'),700);
+  }
+}
+function copyCode(id){
+  const text=document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(()=>spark('COPIED')).catch(()=>alert('Code copied — paste it into Thonny.'));
+}
+function finish(){
+  document.getElementById('final-xp').textContent=String(score).padStart(3,'0')+' PTS';
+  document.getElementById('done').classList.add('show');
+  document.getElementById('progress').style.width='100%';
+  let burst=0;const t=setInterval(()=>{spark(['+','✓','▸','◆'][Math.floor(Math.random()*4)]);if(++burst>16)clearInterval(t);},80);
+}
+</script>
+</body>
+</html>
